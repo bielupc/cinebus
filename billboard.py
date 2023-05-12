@@ -43,14 +43,14 @@ class Billboard:
     projections: list[Projection]
 
 
-def get_addr(soup: BeautifulSoup) -> Iterator[str]:
+def _get_addr(soup: BeautifulSoup) -> Iterator[str]:
     """Generator that yields as strings the addreces of all the cinemas given the soup object."""
     for addr in soup.find_all("span", attrs={"class": "lighten"}):
         if len(addr["class"]) == 1:
             yield (addr.text).strip()
 
 
-def get_cinema(soup: BeautifulSoup) -> Iterator[str]:
+def _get_cinema(soup: BeautifulSoup) -> Iterator[str]:
     """
     Generator that yields strings corresponding to the names of the cinemas found on the soup object.
     """
@@ -58,7 +58,7 @@ def get_cinema(soup: BeautifulSoup) -> Iterator[str]:
         yield (cinema.text).strip()
 
 
-def get_projections(soup: BeautifulSoup) -> Iterator[Tag]:
+def _get_projections(soup: BeautifulSoup) -> Iterator[Tag]:
     """
     Generator that yields a parsed HTML (tag) of the different blocks of projections that each cinema offers.
     """
@@ -66,7 +66,7 @@ def get_projections(soup: BeautifulSoup) -> Iterator[Tag]:
         yield table.find("div", attrs={"class": "tabs_box_pan item-0"})
 
 
-def get_film_data(soup: Tag) -> tuple[str, str, str, list[str], str]:
+def _get_film_data(soup: Tag) -> tuple[str, str, str, list[str], str]:
     """
     Given the parsed HTML tag that hold film data, it scrapes all the required attributes for the film dataclass and returns them as a tuple.
     """
@@ -107,13 +107,13 @@ def read() -> Billboard:
         soup = BeautifulSoup(page.text, "html.parser")
 
         # It uses generators to get the data ordered by cinema.
-        for cinema_name, addr, projections_block in zip(get_cinema(soup), get_addr(soup), get_projections(soup)):
+        for cinema_name, addr, projections_block in zip(_get_cinema(soup), _get_addr(soup), _get_projections(soup)):
             cinema = Cinema(cinema_name, addr)
             billboard.cinemas.append(cinema)
 
             # It gathers the data of each film on the projections block
             for film_data in projections_block.find_all("div", attrs={"class": "item_resa"}):
-                title, genre, director, actors, lang = get_film_data(film_data)
+                title, genre, director, actors, lang = _get_film_data(film_data)
                 film = Film(title, genre, director, actors)
 
                 # If the film is not registered yet, it gets added
