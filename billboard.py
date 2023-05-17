@@ -68,13 +68,14 @@ def _get_projections(soup: BeautifulSoup) -> Iterator[Tag]:
 
 def _get_film_data(soup: Tag) -> tuple[str, str, str, list[str], str]:
     """
-    Given the parsed HTML tag that hold film data, it scrapes all the required attributes for the film dataclass and returns them as a tuple.
+    Given the parsed HTML tag that holds film data, it scrapes all the required attributes for the film dataclass and returns them as a tuple.
     """
     tags = [tag.text.strip()
             for tag in soup.find_all("span", attrs={"class": "bold"})]
     lang = "Dubbed" if "Versión Doblada" in tags else "Original"
 
     dataJSON = soup.find("div", attrs={"data-movie": True})
+
     # it makes sure we obtained the right data type for mypy purposes
     if isinstance(dataJSON, Tag):
         data = json.loads(dataJSON.attrs["data-movie"])
@@ -88,13 +89,15 @@ def read() -> Billboard:
     """
     It scrapes the Sensacine webpage to return a Billboard object with all the film-related data.
     """
-    url = "https://www.sensacine.com/cines/cines-en-72480/"
+    urls = ["https://www.sensacine.com/cines/cines-en-72480/",
+            "https://www.sensacine.com/cines/cines-en-72480/?page=2",
+            "https://www.sensacine.com/cines/cines-en-72480/?page=3"]
     billboard = Billboard(list(), list(), list())
 
     # It iterates over the 3 sub-pages
-    for i in range(1, 4):
+    for url in urls:
         try:
-            page = requests.get(f"{url}?page={i}")
+            page = requests.get(url)
             page.raise_for_status()
 
         except HTTPError as http_err:
@@ -111,20 +114,25 @@ def read() -> Billboard:
             cinema = Cinema(cinema_name, addr)
             billboard.cinemas.append(cinema)
 
-            # It gathers the data of each film on the projections block
-            for film_data in projections_block.find_all("div", attrs={"class": "item_resa"}):
-                title, genre, director, actors, lang = _get_film_data(film_data)
-                film = Film(title, genre, director, actors)
+            # This handles cinemas with no projections.
+            try:
+                # It gathers the data of each film on the projections block
+                for film_data in projections_block.find_all("div", attrs={"class": "item_resa"}):
+                    title, genre, director, actors, lang = _get_film_data(
+                        film_data)
+                    film = Film(title, genre, director, actors)
 
-                # If the film is not registered yet, it gets added
-                if not any(f.title == title for f in billboard.films):
-                    billboard.films.append(film)
+                    # If the film is not registered yet, it gets added
+                    if not any(f.title == title for f in billboard.films):
+                        billboard.films.append(film)
 
-                # It creates an entry for each projection of the film
-                for projection in film_data.find_all("em"):
-                    time_parts = projection.text.strip().split(":")
-                    time = (int(time_parts[0]), int(time_parts[1]))
-                    billboard.projections.append(
-                        Projection(film, cinema, time, lang))
+                    # It creates an entry for each projection of the film
+                    for projection in film_data.find_all("em"):
+                        time_parts = projection.text.strip().split(":")
+                        time = (int(time_parts[0]), int(time_parts[1]))
+                        billboard.projections.append(
+                            Projection(film, cinema, time, lang))
+            except:
+                print("Empty cinema without projections.")
 
     return billboard
