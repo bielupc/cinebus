@@ -14,7 +14,6 @@ class Film:
     genre: str
     director: str
     actors: list[str]
-    ...
 
 
 @dataclass
@@ -22,7 +21,6 @@ class Cinema:
     """Dataclass that stores information about a cinema."""
     name: str
     address: str
-    ...
 
 
 @dataclass
@@ -32,7 +30,6 @@ class Projection:
     cinema: Cinema
     time: tuple[int, int]   # hora:minut
     language: str
-    ...
 
 
 @dataclass
