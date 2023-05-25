@@ -106,7 +106,6 @@ def plot(g: BusesGraph, nom_fitxer: str) -> None:
 
 def show(g: BusesGraph) -> None:
     """Given the bus graph, it gets shown interactively as a matplotlib window."""
-    pos = nx.get_node_attributes(g, 'pos')
     plt.figure(figsize=(8, 6))
     pos = {node: (node.x, node.y) for node in g.nodes}
     nx.draw(g, pos=pos, with_labels=False, node_size=50, node_color='red')
