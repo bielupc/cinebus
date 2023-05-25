@@ -4,8 +4,11 @@ from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup, Tag
 from typing import Iterator
 import json
-# types-beautifulsoup4
 
+
+######################
+#     Datatypes      #
+######################
 
 @dataclass
 class Film:
@@ -40,6 +43,30 @@ class Billboard:
     projections: list[Projection]
 
 
+####################################
+#   Data adquisition & handeling   #
+####################################
+
+
+def _get_film_data(soup: Tag) -> tuple[str, str, str, list[str], str]:
+    """
+    Given the parsed HTML tag that holds film data, it scrapes all the required attributes for the film dataclass and returns them as a tuple.
+    """
+    tags = [tag.text.strip()
+            for tag in soup.find_all("span", attrs={"class": "bold"})]
+    lang = "Dubbed" if "Versión Doblada" in tags else "Original"
+
+    dataJSON = soup.find("div", attrs={"data-movie": True})
+
+    # it makes sure we obtained the right data type for mypy purposes
+    if isinstance(dataJSON, Tag):
+        data = json.loads(dataJSON.attrs["data-movie"])
+        return data["title"], data["genre"][0], data["directors"][0], data["actors"], lang
+    else:
+        raise AttributeError(
+            "Accessing attributes of something is not an HTML tag.")
+
+
 def _get_addr(soup: BeautifulSoup) -> Iterator[str]:
     """Generator that yields as strings the addreces of all the cinemas given the soup object."""
     for addr in soup.find_all("span", attrs={"class": "lighten"}):
@@ -63,23 +90,9 @@ def _get_projections(soup: BeautifulSoup) -> Iterator[Tag]:
         yield table.find("div", attrs={"class": "tabs_box_pan item-0"})
 
 
-def _get_film_data(soup: Tag) -> tuple[str, str, str, list[str], str]:
-    """
-    Given the parsed HTML tag that holds film data, it scrapes all the required attributes for the film dataclass and returns them as a tuple.
-    """
-    tags = [tag.text.strip()
-            for tag in soup.find_all("span", attrs={"class": "bold"})]
-    lang = "Dubbed" if "Versión Doblada" in tags else "Original"
-
-    dataJSON = soup.find("div", attrs={"data-movie": True})
-
-    # it makes sure we obtained the right data type for mypy purposes
-    if isinstance(dataJSON, Tag):
-        data = json.loads(dataJSON.attrs["data-movie"])
-        return data["title"], data["genre"][0], data["directors"][0], data["actors"], lang
-    else:
-        raise AttributeError(
-            "Accessing attributes of something is not an HTML tag.")
+######################
+#        Main        #
+######################
 
 
 def read() -> Billboard:
