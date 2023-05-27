@@ -16,6 +16,7 @@ import staticmaps
 
 
 BusesGraph: TypeAlias = nx.Graph
+Coord : TypeAlias = tuple[float, float]   # (latitude, longitude)
 
 
 @dataclass(frozen=True)
@@ -30,8 +31,7 @@ class Line:
 @dataclass(frozen=True)
 class Stop:
     """"Hashable dataclass that holds data for a bus stop"""
-    x: int
-    y: int
+    pos: Coord
     name: str
     order: int
     line_id: int
@@ -78,7 +78,7 @@ def _get_data() -> dict:
 
 def _build_stop(data: dict, i: int) -> Stop:
     """Given the dictionary containing the data, it gathers all the needed items regarding a stop, and returns the stop object."""
-    return Stop(data["UTM_X"], data["UTM_Y"], data["Nom"], data["Ordre"], data["IdLinia"], data["Adreca"], data["Municipi"], data["Adaptada"], data["EstatParada"], i)
+    return Stop((data["UTM_X"], data["UTM_Y"]), data["Nom"], data["Ordre"], data["IdLinia"], data["Adreca"], data["Municipi"], data["Adaptada"], data["EstatParada"], i)
 
 
 def _build_line(data: dict) -> Line:
@@ -96,8 +96,8 @@ def plot(g: BusesGraph, nom_fitxer: str) -> None:
     context = staticmaps.Context()
     context.set_tile_provider(staticmaps.tile_provider_OSM)
     for edge in g.edges():
-        n1 = staticmaps.create_latlng(edge[0].x, edge[0].y)
-        n2 = staticmaps.create_latlng(edge[1].x, edge[1].y)
+        n1 = staticmaps.create_latlng(edge[0].pos[0], edge[0].pos[1])
+        n2 = staticmaps.create_latlng(edge[1].pos[0], edge[1].pos[1])
         context.add_object(staticmaps.Line(
             [n1, n2], color=staticmaps.BLUE, width=1))
     image = context.render_pillow(1200, 800)
@@ -107,7 +107,7 @@ def plot(g: BusesGraph, nom_fitxer: str) -> None:
 def show(g: BusesGraph) -> None:
     """Given the bus graph, it gets shown interactively as a matplotlib window."""
     plt.figure(figsize=(8, 6))
-    pos = {node: (node.x, node.y) for node in g.nodes}
+    pos = {node: (node.pos[0], node.pos[1]) for node in g.nodes}
     nx.draw(g, pos=pos, with_labels=False, node_size=50, node_color='red')
     plt.show()
 
@@ -151,10 +151,10 @@ def get_buses_graph() -> BusesGraph:
                     G.add_node(stop)
                     i += 1
                     visided_stops[stop.name] = stop
-                    G.add_edge(previous_stop, stop)
+                    G.add_edge(previous_stop, stop, info=line)
                 else:
                     # Multiple lines sharing stop scenario.
-                    G.add_edge(previous_stop, visided_stops[stop.name])
+                    G.add_edge(previous_stop, visided_stops[stop.name],info=line)
             else:
                 if not stop.name in visided_stops.keys():
                     G.add_node(stop)
