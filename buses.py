@@ -124,6 +124,9 @@ def get_buses_graph() -> BusesGraph:
     lines_data = all_data["ObtenirDadesAMBResult"]["Linies"]["Linia"]
     previous_stop: Stop
 
+    # Stop ID
+    i = 0
+
     # We iterate over the lines
     for line_data in lines_data:
         line = _build_line(line_data)
@@ -132,8 +135,6 @@ def get_buses_graph() -> BusesGraph:
         if not line.active:
             continue
 
-        # Stop ID
-        i = 0
         # It keeps track of the added stops.
         visided_stops: dict[str, Stop] = dict()
         # It iterates over the different stops
