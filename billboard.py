@@ -10,6 +10,7 @@ import json
 #     Datatypes      #
 ######################
 
+
 @dataclass
 class Film:
     """Dataclass that stores information about a film."""
