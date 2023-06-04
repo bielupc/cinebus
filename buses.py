@@ -101,7 +101,7 @@ def plot(g: BusesGraph, nom_fitxer: str) -> None:
         context.add_object(staticmaps.Line(
             [n1, n2], color=staticmaps.BLUE, width=1))
     image = context.render_pillow(1200, 800)
-    image.save(nom_fitxer)
+    image.save(nom_fitxer+".png")
 
 
 def show(g: BusesGraph) -> None:
