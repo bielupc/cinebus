@@ -92,6 +92,38 @@ def _get_projections(soup: BeautifulSoup) -> Iterator[Tag]:
 
 
 ######################
+#     Filtering      #
+######################
+
+def film_search(bb: Billboard, query: str) -> list[Film]:
+    """Given a Billboard object and a query, it looks for the films containing the query."""
+    matches: list[Film] = list()
+    key_words = [word.lower() for word in query.split()]
+    for film in bb.films:
+        if any(word in film.title.lower() for word in key_words):
+            matches.append(film)
+    return matches
+
+def cinema_search(bb: Billboard, query: str) -> list[Cinema]:
+    """Given a Billboard object and a query, it looks for the cinemas containing the query."""
+    matches: list[Cinema] = list()
+    key_words = [word.lower() for word in query.split()]
+    for cinema in bb.cinemas:
+        if any(word in cinema.name.lower() for word in key_words):
+            matches.append(cinema)
+    return matches
+
+def cinemas_by_film(bb: Billboard, title: str) -> list[Cinema]:
+    """Given a film is being projected somewhere, it returns the cinemas where it can be seen."""
+    matches: list[Cinema] = list()
+    for projection in bb.projections:
+       if projection.film.title == title:
+        matches.append(projection)
+    return matches
+ 
+
+
+######################
 #        Main        #
 ######################
 
@@ -147,3 +179,9 @@ def read() -> Billboard:
                 print("Empty cinema without projections.")
 
     return billboard
+
+
+# bb = read()
+
+# print(cinemas_by_film(bb, "La Sirenita"))
+# print(cinema_search(bb, "y"))

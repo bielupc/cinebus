@@ -179,6 +179,73 @@ class Menu:
     except:
       print("You must first download the City graph!")
       user_wait()
+  
+  def search_billboard(self) -> None:
+    while True:
+      clear()
+      print("(1) Search for a film")
+      print("(2) Search for a cinema")
+      print("(3) Search for a projections")
+      print("(4) Go back")
+      print()
+      choice = yg.scan(int)
+
+      try:
+        self._billboard
+      except:
+        print("You must first download the Billboard!")
+        user_wait()
+        return
+      if choice == 1:
+        print("Enter the film you're looking for:")
+        query = yg.scan(str)
+        matches = bb.film_search(self._billboard, query)
+        if len(matches) == 0:
+          print("No results were found :( ")
+        else:
+          for film in matches:
+            print(film.title)
+            print(f"   * Genre: {film.genre}")
+            print(f"   * Director: {film.director}")
+            print("   * Actors: {}".format(", ".join(actor for actor in film.actors)))
+            print()
+        user_wait()
+
+      elif choice == 2:
+        print("Enter the cinema you're looking for:")
+        query = yg.scan(str)
+        matches = bb.cinema_search(self._billboard, query)
+        if len(matches) == 0:
+          print("No results were found :(")
+        else:
+          for cinema in matches:
+            print(cinema.name)
+            print(f"   * Address: {cinema.address}")
+            print()
+        user_wait()
+      elif choice == 3:
+        print("Enter the exact name of the film you want to watch:")
+        query = input()
+        matches = bb.cinemas_by_film(self._billboard, query)
+        if len(matches) == 0:
+          print("No results were found :( ")
+        else:
+          previous = ""
+          for projection in matches:
+            if projection.cinema.name != previous:
+              previous = projection.cinema.name
+              print()
+              print(projection.cinema.name)
+              print(f"   * Address: {projection.cinema.address}")
+              print("   * Sessions:") 
+            print("       {}  {}".format("{:02d}:{:02d}".format(*projection.time), projection.language))
+        user_wait()
+      elif choice == 4:
+        break
+      else:
+        print()
+        print("You must enter a valid option!")
+        user_wait()
 
   
   def main_choice(self, choice):
@@ -191,7 +258,7 @@ class Menu:
       elif choice == 3:
         self.show_billboard()
       elif choice == 4:
-        pass
+        self.search_billboard()
       elif choice == 5:
         self.create_bus_graph()
       elif choice == 6:
