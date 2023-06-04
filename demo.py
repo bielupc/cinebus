@@ -6,7 +6,8 @@ import yogi as yg
 import os
 import pickle
 import sys
-
+import time
+from geopy.geocoders import Nominatim
 
 def clear() -> None:
   os.system("cls||clear")
@@ -16,11 +17,12 @@ def user_wait() -> None:
   input("Press any key to continue...")
 
 
-class Menu:
 
+class Menu:
   _billboard: bb.Billboard
   _buses: bs.BusesGraph
   _city: ct.CityGraph
+  _ox_g: ct.OsmnxGraph
 
   def __init__(self):
     pass
@@ -133,9 +135,10 @@ class Menu:
   def create_city_graph(self) -> None:
     # For debugging
     self._city= pickle.load(open("data/citygraph.pickle","rb"))
+    self._ox_g = pickle.load(open("data/osmnxgraph.pickle", "rb"))
     # try: 
-
-    #   g1 = ct.get_osmnx_graph()
+      # self._ox_g = ct.get_osmnx_graph()
+      # g1 = self._ox_g 
 
     #   try: 
     #     g2 = self._buses
@@ -247,9 +250,76 @@ class Menu:
         print("You must enter a valid option!")
         user_wait()
 
+  def find_route(self):
+    try:
+      self._ox_g
+      self._city
+      self._billboard
+    except:
+      print("You must first download the City graph and Billboard!")
+      user_wait()
+      return
+
+
+    try:
+      clear()
+      print("Enter your latitude:")
+      x = yg.read(float)
+      print("Enter your longitude:")
+      y = yg.read(float)
+      clear()
+      print("Enter the exact title of the film you want to watch:")
+      desired_film = input()
+      print(desired_film)
+
+      destination = self.find_destination(desired_film)
+
+      print("Give your path a name to save:")
+      filename = yg.read(str)
+
+      path = ct.find_path(self._ox_g, self._city, (x, y), destination)
+      ct.plot_path(self._city, path, filename)
+
+      print("The route you need to follow has been saved as '{}'".format(filename))
+      user_wait()
+    except:
+      print()
+      print("An error has occurred!")
+      user_wait()
+    
+  def find_destination(self, desired_film: str) -> bs.Coord:
+    # Find 
+
+    current_time = time.localtime()
+    hour = current_time.tm_hour
+    minute = current_time.tm_min
+    time_tuple = (hour, minute)
+
+    candidate: bb.Projection = None
+
+    min_diff = float("inf")
+
+    for projection in self._billboard.projections:
+      if projection.film.title == desired_film:
+        film_time = projection.time
+        hours_diff = film_time[0] - hour
+        minute_diff = film_time[1] - minute
+        if hours_diff > 0 or (hours_diff == 0 and minute_diff >= 0):
+          diff = hours_diff * 60 + minute_diff
+          if diff < min_diff:
+            candidate = projection
+            min_diff = diff
+
+    print("Your session is at: \n {}\n{}\n{} ".format(candidate.cinema.name, candidate.cinema.address, "{:02d}:{:02d}".format(*candidate.time)))
+
+    geolocator = Nominatim(user_agent="cinebus")
+    location = geolocator.geocode(candidate.cinema.address)
+    print(location.address)
+    print(location.latitude)
+    return location.latitude, location.longitude
+
   
   def main_choice(self, choice):
-
     try:
       if choice ==  1:
         self.show_credits()
@@ -269,7 +339,7 @@ class Menu:
         self.show_city_graph()
         pass
       elif choice == 9:
-        pass
+        self.find_route()
       else:
         print("You must enter a valid option!")
         user_wait()
@@ -286,7 +356,6 @@ def main() -> None:
     choice = yg.scan(int)
     if choice == 10: sys.exit(1)
     menu.main_choice(choice)
-
 
 
 if __name__ == "__main__":

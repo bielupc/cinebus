@@ -101,7 +101,7 @@ def plot_path(g: CityGraph, p: Path, filename: str) -> None:
         context.add_object(staticmaps.Line(
             [n1, n2], color=staticmaps.BLUE, width=5))
     image = context.render_pillow(1200, 800)
-    image.save(filename)
+    image.save(filename+".png")
 
 
 ######################

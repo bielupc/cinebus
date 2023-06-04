@@ -154,6 +154,9 @@ def read() -> Billboard:
 
         # It uses generators to get the data ordered by cinema.
         for cinema_name, addr, projections_block in zip(_get_cinema(soup), _get_addr(soup), _get_projections(soup)):
+
+            if "Barcelona" not in addr: continue
+
             cinema = Cinema(cinema_name, addr)
             billboard.cinemas.append(cinema)
 
