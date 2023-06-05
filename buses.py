@@ -16,7 +16,7 @@ import staticmaps
 
 
 BusesGraph: TypeAlias = nx.Graph
-Coord : TypeAlias = tuple[float, float]   # (latitude, longitude)
+Coord: TypeAlias = tuple[float, float]   # (latitude, longitude)
 
 
 @dataclass(frozen=True)
@@ -155,7 +155,8 @@ def get_buses_graph() -> BusesGraph:
                     G.add_edge(previous_stop, stop, info=line)
                 else:
                     # Multiple lines sharing stop scenario.
-                    G.add_edge(previous_stop, visided_stops[stop.name],info=line)
+                    G.add_edge(previous_stop,
+                               visided_stops[stop.name], info=line)
             else:
                 if not stop.name in visided_stops.keys():
                     G.add_node(stop)

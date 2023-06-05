@@ -1,97 +1,86 @@
-# Project Title
+# CINEBUS - AP2 GCED Q1 SPRING 2023
+![city](city.png)
+## Biel Altimira Tarter
 
-One Paragraph of project description goes here
+Cinebus is a project that allows anybody to look through the data related to films and cinemas, chose a desired projection and reach out to the cinema the fastest way by bus and also walking when necesary. The program is operated through a CLI menu on the terminal that allows you to download the data, create the graphs, look for films and find the easiest way to get somewhere.
 
-# types-beautifulsoup4
-# types-beautifulsoup4
-# types-beautifulsoup4
-# types-beautifulsoup4
-# types-beautifulsoup4
-# types-beautifulsoup4
-pip install networkx-stubs
-types-all
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+All the needed code and data is provided in this directory, everything extra is downloaded by the program itself. Just note that since the creation of the City graph takes from 3 to 5 minutes, I've also provided the pickle file for quick debug and checking. Nonetheless, the method to create the City graph works perfectly if provided with the needed time.
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+All the prerequisites are provided within the file:
 
 ```
-Give examples
+requirements.txt
 ```
+
+since the project has been developed using the virtual environment module `virtualenv`. I first started using `conda` but stumbled upon some compatibility issues and missing packages so I decided to make the transition.
+
+The python version used is `3.11.3`
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
+To run the project, no further installations are needed, just make sure the python verion is the same and install the requirements using pip:
 
 ```
-Give the example
+python3 -m pip install -r requirements.txt
 ```
 
-And repeat
+Or in case of anaconda (bear in mind some packages were not found)
 
 ```
-until finished
+conda install --file requirements.txt
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+## Billboard
 
-## Running the tests
+The billboard module gathers all the data related to cinemas and films. It uses generators to acquire all the data in an ordered way. Also, some auxiliary functions have been defined in order to build the objects of the created datasctructures by gathering the needed data out of a raw piece of information extracted from the web.
 
-Explain how to run the automated tests for this system
+## Buses
+The buses module creates the Line and Stop hashable data structures and by iterating over the ATM data, it creates the different nodes and edges. Since at each moment we know the node we are working with, the nodes are the Stop objects themselves. This simplifies access to their attributes and doesn't obstruct the search, since it's not performed in this module.
 
-### Break down into end to end tests
+The programming style and workflow is similar to the billboard module.
 
-Explain what these tests test and why
+## City
 
-```
-Give an example
-```
+This module creates the key graph, the city graph, union of both buses and the OSMnx graph of the city of BCN that is obtained in this module. The way it works is by iterating seperatedly among the nodes and edges of both buses and streets graph. The nodes are identifiers with attributes containing the Stop, Cruilla dataclasses, color, and weight.
 
-### And coding style tests
+The weight is a time value obtained by dividing the length of the edge by the speed of crossing the edge plus some constant if it's a bus, since it takes some extra time to load and unload the passengers.
 
-Explain what these tests test and why
+Unfortunately, the weights are not very well calibrated and most of the times, the method that finds the paths priorizes walking instead of taking a bus, which is sometimes unrealistic.
 
-```
-Give an example
-```
+Also, it adds an edge from each stop to the nearest cruilla, operation that taking a long time. I have experimented using OSMnx built in functions and other alternatives using multithreading, but iterating by hand has given me the best results.
 
-## Deployment
 
-Add additional notes about how to deploy this on a live system
+## Demo
+The demo simply uses a class-menu approach to provide all the asked functionalities and user-friendly navigation.
+![path](path.png)
+
+## Conclusion
+My project is functional and meets most of the asked requirements, as an improvement, a better weight calibartion would lead to better optimal cinema finding, since i'm also not taking into accont the time it takes to get to the cinema. However, my main focus has been on providing clean and readable code as well as documenting everything and using all the tools that I can perfectly understant how they work under the hood.
+
+
+
+## Testing
+To prevent having to generate the city graph over and over again, the citygraph.pickle file has been provided, and on the `demo.py` and `city.py` files, some pieces of code are commented out in order to directly load the graph using this pre-created pickle file. This way it's easier to debug, fix, or just explore in depth the way my code works, without needing to reload.
+
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+* [NetworkX](https://networkx.org/) - Custom graph creation
+* [OSMnx](https://osmnx.readthedocs.io/en/stable/) - City graph preloaded with data
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+I have used Git during the development of this project, so all the different versions and commits are available.
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+* **Biel Altimira Tarter**
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
-
+* UPC - Universitat Politècnia de Catalunya

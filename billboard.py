@@ -104,6 +104,7 @@ def film_search(bb: Billboard, query: str) -> list[Film]:
             matches.append(film)
     return matches
 
+
 def cinema_search(bb: Billboard, query: str) -> list[Cinema]:
     """Given a Billboard object and a query, it looks for the cinemas containing the query."""
     matches: list[Cinema] = list()
@@ -113,14 +114,14 @@ def cinema_search(bb: Billboard, query: str) -> list[Cinema]:
             matches.append(cinema)
     return matches
 
-def cinemas_by_film(bb: Billboard, title: str) -> list[Cinema]:
-    """Given a film is being projected somewhere, it returns the cinemas where it can be seen."""
-    matches: list[Cinema] = list()
+
+def cinemas_by_film(bb: Billboard, title: str) -> list[Projection]:
+    """Given a film is being projected somewhere, it returns the projection objects found on the Billboard."""
+    matches: list[Projection] = list()
     for projection in bb.projections:
-       if projection.film.title == title:
-        matches.append(projection)
+        if projection.film.title == title:
+            matches.append(projection)
     return matches
- 
 
 
 ######################
@@ -155,7 +156,8 @@ def read() -> Billboard:
         # It uses generators to get the data ordered by cinema.
         for cinema_name, addr, projections_block in zip(_get_cinema(soup), _get_addr(soup), _get_projections(soup)):
 
-            if "Barcelona" not in addr: continue
+            if "Barcelona" not in addr:
+                continue
 
             cinema = Cinema(cinema_name, addr)
             billboard.cinemas.append(cinema)
@@ -182,9 +184,3 @@ def read() -> Billboard:
                 print("Empty cinema without projections.")
 
     return billboard
-
-
-# bb = read()
-
-# print(cinemas_by_film(bb, "La Sirenita"))
-# print(cinema_search(bb, "y"))

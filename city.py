@@ -1,7 +1,7 @@
 import osmnx as ox
 import matplotlib.pyplot as plt
 import networkx as nx
-from typing import TypeAlias
+from typing_extensions import TypeAlias
 import os
 import pickle
 from dataclasses import dataclass
@@ -238,7 +238,7 @@ def build_city_graph(g1: OsmnxGraph, g2: BusesGraph) -> CityGraph:
                 line_data), color="red", weight=(dist/BUS_AVERAGE_SPEED))  # + BUS_LOAD_TIME)
 
     # The graph creation takes from 3 to 5 minutes, it's worth dumping the graph onto a pickle file to prevent remaking the long computations.
-    # pickle.dump(G, open(f"data/citygraph.pickle","wb"))
+    pickle.dump(G, open(f"data/citygraph.pickle", "wb"))
 
     return G
 
@@ -269,15 +269,3 @@ def find_path(ox_g: OsmnxGraph, g: CityGraph, src: Coord, dst: Coord) -> Path:
     path.add_edge(route[-1], "dst")
 
     return path
-
-
-# g1 = get_osmnx_graph()
-# g2 = get_buses_graph()
-# G = build_city_graph(g1, g2)
-# G = pickle.load(open("data/citygraph.pickle","rb"))
-# show(G)
-
-# # find_path(g1, G, (41.385555,2.145889),(41.382509, 2.144124))
-
-
-# # plot(G, "grafic2.png")
