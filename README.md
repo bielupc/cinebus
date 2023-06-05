@@ -1,4 +1,4 @@
-# CINEBUS - AP2 GCED Q1 SPRING 2023
+# CINEBUS - AP2 GCED Q2 SPRING 2023
 ![city](city.png)
 ## Biel Altimira Tarter
 
